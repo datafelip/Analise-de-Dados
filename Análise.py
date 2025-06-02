@@ -1,44 +1,39 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Cálculo das Médias das Variáveis
 
-df = pd.read_excel('Base de Dados.xlsx')
+df = pd.read_excel("Base de Dados.xlsx")
+df.columns = df.columns.str.strip().str.replace("\xa0", "", regex=True)
+
+
 def calcular_media(df, coluna):
-  media = df[coluna].mean()
-  return print(f"Média de '{coluna.strip()}': {media}")
-calcular_media(df, 'Erros_Reportados\xa0')
-calcular_media(df, 'Tempo_Conclusao\xa0')
-calcular_media(df, 'Produtividade\xa0')
-calcular_media(df, 'Experiencia\xa0')
+    media = df[coluna].mean()
+    print(f"Média de '{coluna}': {media:.2f}")
 
-# Cálculo do Desvio padrão das Variáveis
+# Médias
+for col in ['Erros_Reportados', 'Tempo_Conclusao', 'Produtividade', 'Experiencia']:
+    calcular_media(df, col)
 
-def calcular_desvio_padrao(coluna):
+
+def calcular_desvio_padrao(df, coluna):
     desvio = df[coluna].std()
-    print(f"Desvio padrão de '{coluna.strip()}': {desvio:.2f}")
-calcular_desvio_padrao('Erros_Reportados\xa0')
-calcular_desvio_padrao('Tempo_Conclusao\xa0')
-calcular_desvio_padrao('Produtividade\xa0')
-calcular_desvio_padrao('Experiencia\xa0')
+    print(f"Desvio padrão de '{coluna}': {desvio:.2f}")
 
-# Base para Verificar Outliers
+# Desvios padrão
+for col in ['Erros_Reportados', 'Tempo_Conclusao', 'Produtividade', 'Experiencia']:
+    calcular_desvio_padrao(df, col)
 
-sequencia = df['Erros_Reportados\xa0']
-id = 0
-for numero in sequencia:
-    id +=1
-    if numero > 6:
-      print(f"/\ Acima do Padrão {id} = {numero}")
-    elif numero < 2:
-      print(f"\/ Abaixo do Padrão {id} = {numero}")
+print("\nVerificação de outliers em 'Erros_Reportados':")
+for idx, valor in enumerate(df['Erros_Reportados'], start=1):
+    if valor > 6:
+        print(f"/\\ Acima do Padrão {idx} = {valor}")
+    elif valor < 2:
+        print(f"\\/ Abaixo do Padrão {idx} = {valor}")
 
-df.columns = ['ID', 'Produtividade', 'Experiencia', 'Erros_Reportados', 'Tempo_Conclusao']
+df['Tempo_Conclusao'] = df['Tempo_Conclusao'].round().astype(int)
+df['Produtividade'] = df['Produtividade'].round().astype(int)
 
-df['Tempo_Conclusao'] = df['Tempo_Conclusao'].round(0).astype(int)
-df['Produtividade'] = df['Produtividade'].round(0).astype(int)
-
-def box_plot(df, coluna, titulo, xlabel, cor=''):
+def box_plot(df, coluna, titulo, xlabel, cor='gray'):
     contagem = df[coluna].value_counts().sort_index()
     print(f"\n{titulo} (Tabela):")
     print(pd.DataFrame({
@@ -48,16 +43,14 @@ def box_plot(df, coluna, titulo, xlabel, cor=''):
 
     plt.figure(figsize=(10, 4))
     box = plt.boxplot(df[coluna], vert=False, patch_artist=True)
-
     for pedaco in box['boxes']:
         pedaco.set_facecolor(cor)
-
     plt.title(f'Box Plot de {titulo}')
     plt.xlabel(xlabel)
     plt.tight_layout()
     plt.show()
 
-def grafico_pessoas_por_categoria(df, coluna, titulo, xlabel, cor):
+def grafico_pessoas_por_categoria(df, coluna, titulo, xlabel, cor='gray'):
     contagem = df[coluna].value_counts().sort_index()
     print(f"\n{titulo} (Tabela):")
     print(pd.DataFrame({
@@ -74,13 +67,13 @@ def grafico_pessoas_por_categoria(df, coluna, titulo, xlabel, cor):
     plt.tight_layout()
     plt.show()
 
-# Gráficos de barras para as variáveis
+# Gráficos de barras
 grafico_pessoas_por_categoria(df, 'Erros_Reportados', 'Quantidade de Erros', 'Erro', 'red')
 grafico_pessoas_por_categoria(df, 'Tempo_Conclusao', 'Tempo de Conclusão', 'Hora', 'orange')
 grafico_pessoas_por_categoria(df, 'Produtividade', 'Produtividade (Linhas/Dia)', 'Linha', 'green')
 grafico_pessoas_por_categoria(df, 'Experiencia', 'Experiência', 'Ano de Experiência', 'skyblue')
 
-# Box plots para cada variável
+# Box plots
 box_plot(df, 'Erros_Reportados', 'Quantidade de Erros', 'Erro', 'red')
 box_plot(df, 'Tempo_Conclusao', 'Tempo de Conclusão', 'Hora', 'orange')
 box_plot(df, 'Produtividade', 'Produtividade (Linhas/Dia)', 'Linha', 'green')
